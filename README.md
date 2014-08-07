@@ -11,4 +11,6 @@ This will create two files: position.tsv shows your net position for each questi
 
 Please let me know of any bugs, issues, or requests at bengolden1@gmail.com
 
-Thanks to Jay Kominek for sharing the link above.
+Feel free to make any adjustments to this code, but please share with the SciCast community.  Google group here: https://groups.google.com/forum/#!forum/scicasters
+
+Thanks to Jay Kominek for sharing the link above and to SciCast for being awesome.
