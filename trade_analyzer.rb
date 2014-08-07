@@ -21,33 +21,23 @@ end
 class ScicastPosition
 	@@position = []
 	@@edits = []
+
 	def self.parse_edits
 		file = File.open(FILE)
-		output = ""
+		file_text = ""
 		file.each do |line|
-			output << line
+			file_text << line
 		end
-		raw_edits = JSON.parse(output)
+		raw_edits = JSON.parse(file_text)
 		raw_edits.each do |edit|
-			q_id = edit["question"]["id"]
-			q_name = edit["question"]["name"].gsub(/[\n\t\r]/,"")
-		  unless edit["assumptions"] == []
-				assumption_q_id = edit["assumptions"][0]["id"]
-				assumption_q_name = edit["assumptions"][0]["name"].gsub(/[\n\t\r]/,"")
-				assumption_c_id = edit["assumptions"][0]["dimension"]
-				assumption_choices = edit["assumptions"][0]["choices"]
-				assumption_c_name = assumption_choices[assumption_c_id]["name"].gsub(/[\n\t\r]/,"")
-			end
 			edit["question"]["choices"].each_with_index do |choice, index|
-			 	c_name = choice["name"].gsub(/[\n\t\r]/,"")
-			 	exposure = edit["assets_per_option"][index].round(3)
-			 	args = {q_id: q_id, 
-			 					q_name: q_name, 
-			 					c_name: c_name, 
-			 					exposure: exposure,
-			 					assumption_q_id: assumption_q_id, 
-			 					assumption_q_name: assumption_q_name,
-			 					assumption_c_name: assumption_c_name}
+			 	args = {q_id: edit["question"]["id"], 
+			 					q_name: edit["question"]["name"].gsub(/[\n\t\r]/,""), 
+			 					c_name: choice["name"].gsub(/[\n\t\r]/,""),
+			 					exposure: edit["assets_per_option"][index].round(3),
+			 					assumption_q_id: "#{edit["assumptions"][0]["id"] unless edit["assumptions"] == []}",
+			 					assumption_q_name: "#{edit["assumptions"][0]["name"].gsub(/[\n\t\r]/,"") unless edit["assumptions"] == []}",
+			 					assumption_c_name: "#{edit["assumptions"][0]["choices"][edit["assumptions"][0]["dimension"]]["name"].gsub(/[\n\t\r]/,"") unless edit["assumptions"] == []}"}
 			 	@@edits << Position.new(args)
 			end
 		end
@@ -68,6 +58,8 @@ class ScicastPosition
 		IO.write('edits.tsv',self.edits_to_tsv)
 	end
 
+	private 
+
 	def self.edits_to_tsv
 		output = "Question id\tQuestion name\tChoice name\tAssumption q id\tAssumption q name\tAssumption choice name\texposure\n"
 		@@edits.each {|edit| output << edit.to_tsv + "\n"}
@@ -82,7 +74,6 @@ class ScicastPosition
 end
 
 ScicastPosition.parse_edits
-# p ScicastPosition.edits_to_tsv
 ScicastPosition.aggregate_position
 ScicastPosition.save_edits_as_tsv
 ScicastPosition.save_position_as_tsv
