@@ -21,7 +21,7 @@ end
 class ScicastPosition
 	@@position = []
 	@@edits = []
-
+	@@username = ""
 	def self.parse_edits
 		file = File.open(FILE)
 		file_text = ""
@@ -41,6 +41,8 @@ class ScicastPosition
 			 	@@edits << Position.new(args)
 			end
 		end
+		@@username = raw_edits[0]["user"]["username"]
+		@@date = Time.now.to_s[0..9]
 	end
 
 	def self.aggregate_position
@@ -51,11 +53,11 @@ class ScicastPosition
 	end
 
 	def self.save_position_as_tsv
-		IO.write('position.tsv',self.position_to_tsv)
+		IO.write("#{@@username}-position-#{@@date}.tsv",self.position_to_tsv)
 	end
 
 	def self.save_edits_as_tsv
-		IO.write('edits.tsv',self.edits_to_tsv)
+		IO.write("#{@@username}-edits-#{@@date}.tsv",self.edits_to_tsv)
 	end
 
 	private 
