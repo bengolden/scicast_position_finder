@@ -31,14 +31,17 @@ class ScicastPosition
 		raw_edits = JSON.parse(file_text)
 		raw_edits.each do |edit|
 			edit["question"]["choices"].each_with_index do |choice, index|
-			 	args = {q_id: edit["question"]["id"], 
-			 					q_name: edit["question"]["name"].gsub(/[\n\t\r]/,""), 
-			 					c_name: choice["name"].gsub(/[\n\t\r]/,""),
-			 					exposure: edit["assets_per_option"][index].round(3),
-			 					assumption_q_id: "#{edit["assumptions"][0]["id"] unless edit["assumptions"] == []}",
-			 					assumption_q_name: "#{edit["assumptions"][0]["name"].gsub(/[\n\t\r]/,"") unless edit["assumptions"] == []}",
-			 					assumption_c_name: "#{edit["assumptions"][0]["choices"][edit["assumptions"][0]["dimension"]]["name"].gsub(/[\n\t\r]/,"") unless edit["assumptions"] == []}"}
-			 	@@edits << Position.new(args)
+				exposure = edit["assets_per_option"][index].round(3)
+				if exposure != 0 && edit["question"]["settled_values"] == nil
+				 	args = {q_id: edit["question"]["id"], 
+				 					q_name: edit["question"]["name"].gsub(/[\n\t\r]/,""), 
+				 					c_name: choice["name"].gsub(/[\n\t\r]/,""),
+				 					exposure: exposure,
+				 					assumption_q_id: "#{edit["assumptions"][0]["id"] unless edit["assumptions"] == []}",
+				 					assumption_q_name: "#{edit["assumptions"][0]["name"].gsub(/[\n\t\r]/,"") unless edit["assumptions"] == []}",
+				 					assumption_c_name: "#{edit["assumptions"][0]["choices"][edit["assumptions"][0]["dimension"]]["name"].gsub(/[\n\t\r]/,"") unless edit["assumptions"] == []}"}
+				 	@@edits << Position.new(args) 
+				end
 			end
 		end
 		@@username = raw_edits[0]["user"]["username"]
