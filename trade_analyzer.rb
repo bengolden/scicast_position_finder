@@ -11,10 +11,12 @@ class Position
 		@assumption_q_name = args[:assumption_q_name]
 		@assumption_c_name = args[:assumption_c_name]
 		@exposure = args[:exposure]
+		@start_value = args[:start_value]
+		@end_value = args[:end_value]
 	end
 
 	def to_tsv
-		"#{@q_id}\t#{@q_name}\t#{@c_name}\t#{@assumption_q_id}\t#{@assumption_q_name}\t#{@assumption_c_name}\t#{@exposure}"
+		"#{@q_id}\t#{@q_name}\t#{@c_name}\t#{@assumption_q_id}\t#{@assumption_q_name}\t#{@assumption_c_name}\t#{@start_value}\t#{@end_value}\t#{@exposure}"
 	end
 end
 
@@ -39,11 +41,15 @@ class ScicastPosition
 				 					exposure: exposure,
 				 					assumption_q_id: "#{edit["assumptions"][0]["id"] unless edit["assumptions"] == []}",
 				 					assumption_q_name: "#{edit["assumptions"][0]["name"].gsub(/[\n\t\r]/,"") unless edit["assumptions"] == []}",
-				 					assumption_c_name: "#{edit["assumptions"][0]["choices"][edit["assumptions"][0]["dimension"]]["name"].gsub(/[\n\t\r]/,"") unless edit["assumptions"] == []}"}
+				 					assumption_c_name: "#{edit["assumptions"][0]["choices"][edit["assumptions"][0]["dimension"]]["name"].gsub(/[\n\t\r]/,"") unless edit["assumptions"] == []}",
+				 					start_value: edit["old_value_list"][index].round(5),
+				 					end_value: edit["new_value_list"][index].round(5)}
 				 	@@edits << Position.new(args) 
 				end
 			end
 		end
+		# p raw_edits.last["old_value_list"]
+		# p raw_edits.last["new_value_list"]
 		@@username = raw_edits[0]["user"]["username"]
 		@@date = Time.now.to_s[0..9]
 	end
@@ -66,7 +72,7 @@ class ScicastPosition
 	private 
 
 	def self.edits_to_tsv
-		output = "Question id\tQuestion name\tChoice name\tAssumption q id\tAssumption q name\tAssumption choice name\texposure\n"
+		output = "Question id\tQuestion name\tChoice name\tAssumption q id\tAssumption q name\tAssumption choice name\tStart value\tEnd value\tExposure\n"
 		@@edits.each {|edit| output << edit.to_tsv + "\n"}
 		output
 	end
